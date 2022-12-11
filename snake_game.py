@@ -26,7 +26,7 @@ class Fruit:
             self.pos.x * CELL_SIZE, self.pos.y * CELL_SIZE, CELL_SIZE, CELL_SIZE
         )
         # 画fruit
-        pygame.draw.rect(canva, COLOUR_FRUIT, fruit_rect)
+        canva.blit(fruit_graphic, fruit_rect)
 
     def random_place(self):
         self.x = randint(0, CELL_NUMBER - 1)
@@ -38,18 +38,95 @@ class Snake:
     def __init__(self):
         self.body = [Vector2(5, 10), Vector2(6, 10), Vector2(7, 10)]
         self.direction = Vector2(1, 0)
+        self.head_graphic = head_right_graphic
+        self.tail_graphic = tail_left_graphic
         self.add_body = False
 
     def draw(self):
-        for block in self.body:
+        self.update_head_graphic()
+        self.update_tail_graphic()
+        for index, block in enumerate(self.body):
             block_rect = pygame.Rect(
                 block.x * CELL_SIZE, block.y * CELL_SIZE, CELL_SIZE, CELL_SIZE
             )
-            pygame.draw.rect(canva, COLOUR_SNAKE, block_rect)
+            if index == self.length - 1:
+                canva.blit(self.head_graphic, block_rect)
+            elif index == 0:
+                canva.blit(self.tail_graphic, block_rect)
+            else:
+                prev_block = self.body[index - 1] - block
+                next_block = self.body[index + 1] - block
+                if prev_block.x == next_block.x:
+                    canva.blit(body_vertical_graphic, block_rect)
+                elif prev_block.y == next_block.y:
+                    canva.blit(body_horizontal_graphic, block_rect)
+                else:
+                    # tr
+                    if (
+                        prev_block.x == 1
+                        and next_block.y == -1
+                        or prev_block.y == -1
+                        and next_block.x == 1
+                    ):
+                        canva.blit(body_tr_graphic, block_rect)
+                    # tl
+                    elif (
+                        prev_block.x == -1
+                        and next_block.y == -1
+                        or prev_block.y == -1
+                        and next_block.x == -1
+                    ):
+                        canva.blit(body_tl_graphic, block_rect)
+                    # bl
+                    elif (
+                        prev_block.x == -1
+                        and next_block.y == 1
+                        or prev_block.y == 1
+                        and next_block.x == -1
+                    ):
+                        canva.blit(body_bl_graphic, block_rect)
+                    # br
+                    elif (
+                        prev_block.x == 1
+                        and next_block.y == 1
+                        or prev_block.y == 1
+                        and next_block.x == 1
+                    ):
+                        canva.blit(body_br_graphic, block_rect)
 
     @property
     def head(self):
         return self.body[-1]
+
+    @property
+    def tail(self):
+        return self.body[0]
+
+    @property
+    def length(self):
+        return len(self.body)
+
+    def update_head_graphic(self):
+        head_direction = self.head - self.body[-2]
+        if head_direction == Vector2(1, 0):
+            self.head_graphic = head_right_graphic
+        elif head_direction == Vector2(-1, 0):
+            self.head_graphic = head_left_graphic
+        elif head_direction == Vector2(0, -1):
+            self.head_graphic = head_up_graphic
+        elif head_direction == Vector2(0, 1):
+            self.head_graphic = head_down_graphic
+
+    def update_tail_graphic(self):
+        tail_direction = self.tail - self.body[1]
+        if tail_direction == Vector2(1, 0):
+            self.tail_graphic = tail_right_graphic
+        elif tail_direction == Vector2(-1, 0):
+            self.tail_graphic = tail_left_graphic
+        elif tail_direction == Vector2(0, -1):
+            self.tail_graphic = tail_up_graphic
+        elif tail_direction == Vector2(0, 1):
+            self.tail_graphic = tail_down_graphic
 
     def move(self):
         current_head = self.head
@@ -109,8 +186,6 @@ pygame.init()
 SNAKE_UPDATE = pygame.USEREVENT
 pygame.time.set_timer(SNAKE_UPDATE, 150)
 
-snake_game = SnakeGame()
-
 canva = pygame.display.set_mode((CELL_SIZE * CELL_NUMBER, CELL_SIZE * CELL_NUMBER))
 clock = pygame.time.Clock()
 
@@ -166,6 +241,8 @@ body_bl_graphic = pygame.image.load(
 crunch_sound_graphic = pygame.mixer.Sound(
     os.path.join(package_base_path, "Assets", "Sound", "crunch.wav")
 )
+
+snake_game = SnakeGame()
 
 while True:
     # 输入
