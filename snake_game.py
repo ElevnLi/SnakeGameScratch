@@ -38,6 +38,7 @@ class Snake:
     def __init__(self):
         self.body = [Vector2(5, 10), Vector2(6, 10), Vector2(7, 10)]
         self.direction = Vector2(1, 0)
+        self.add_body = False
 
     def draw(self):
         for block in self.body:
@@ -53,14 +54,16 @@ class Snake:
     def move(self):
         current_head = self.head
         new_head = current_head + self.direction
-        new_body = self.body[1:]
-        new_body.append(new_head)
-        self.body = new_body[:]
+        if not self.add_body:
+            new_body = self.body[1:]
+            new_body.append(new_head)
+            self.body = new_body[:]
+        else:
+            self.body.append(new_head)
+            self.add_body = False
 
     def grow(self):
-        current_head = self.head
-        new_head = current_head + self.direction
-        self.body.append(new_head)
+        self.add_body = True
 
 
 class SnakeGame:
