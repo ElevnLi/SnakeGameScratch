@@ -36,8 +36,11 @@ class Fruit:
 
 class Snake:
     def __init__(self):
+        self.reset()
+
+    def reset(self):
         self.body = [Vector2(5, 10), Vector2(6, 10), Vector2(7, 10)]
-        self.direction = Vector2(1, 0)
+        self.direction = Vector2(0, 0)
         self.head_graphic = head_right_graphic
         self.tail_graphic = tail_left_graphic
         self.add_body = False
@@ -177,8 +180,7 @@ class SnakeGame:
                 self.game_over()
 
     def game_over(self):
-        pygame.quit()
-        sys.exit()
+        self.snake.reset()
 
 
 pygame.init()
